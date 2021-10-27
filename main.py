@@ -3,14 +3,12 @@ import re
 import os
 from dotenv import load_dotenv
 load_dotenv()
+from commands import run_command, commands
+from db import get_patterns, get_delimiter
 
-from db import add_pattern, get_patterns
 
 client = discord.Client()
 
-commands = {
-    'setpattern': add_pattern
-}
 
 @client.event
 async def on_ready():
@@ -22,10 +20,17 @@ async def on_message(message):
     if message.author == client.user:
         return
 
-    if message.content.startswith("!") and message.content.split(' ')[0][1:] in commands:
-        commands[message.content.split(' ')[0][1:]](message.content.split(' ')[1:])
+    delimiter = None
+    try:
+        delimiter = get_delimiter(message.guild.id)
+    except IndexError:
+        delimiter = '!'
+
+    splited_message = message.content.split(' ')
+    if message.content.startswith(delimiter) and splited_message[0][1:] in commands:
+        await run_command(splited_message[0][1:], splited_message[1:], message)
     else:
-        patterns = get_patterns()
+        patterns = get_patterns(message.guild.id)
         for pattern in patterns:
             r = re.compile(pattern['value'], flags=re.I)
             if r.search(message.content):
