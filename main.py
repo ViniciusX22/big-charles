@@ -1,6 +1,7 @@
 import discord
 import re
 import os
+from random import randrange
 from dotenv import load_dotenv
 load_dotenv()
 from commands import run_command, commands
@@ -33,7 +34,8 @@ async def on_message(message):
         patterns = get_patterns(message.guild.id)
         for pattern in patterns:
             r = re.compile(pattern['value'], flags=re.I)
-            if r.search(message.content):
+            pattern_chance = pattern['chance'] if 'chance' in pattern else 100
+            if r.search(message.content) and randrange(0, 100) <= pattern_chance:
                 await message.channel.send(pattern['response'])
                 break
 
