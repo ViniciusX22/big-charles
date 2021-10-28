@@ -21,6 +21,13 @@ async def on_message(message):
     if message.author == client.user:
         return
 
+    def parse_value(value):
+        if value.startswith('<') and value.endswith('>'):
+            return value[1:-1]
+        if value.startswith('\\<') and value.endswith('\\>'):
+            value = value[1:-2] + '>'
+        return re.escape(value)
+
     delimiter = None
     try:
         delimiter = get_delimiter(message.guild.id)
@@ -33,10 +40,14 @@ async def on_message(message):
     else:
         patterns = get_patterns(message.guild.id)
         for pattern in patterns:
-            r = re.compile(pattern['value'], flags=re.I)
-            pattern_chance = pattern['chance'] if 'chance' in pattern else 100
-            if r.search(message.content) and randrange(0, 100) <= pattern_chance:
-                await message.channel.send(pattern['response'])
-                break
+            try:
+                value = parse_value(pattern['value'])
+                r = re.compile(value, flags=re.I)
+                pattern_chance = pattern['chance'] if 'chance' in pattern else 100
+                if r.search(message.content) and randrange(0, 100) <= pattern_chance:
+                    await message.channel.send(pattern['response'])
+                    break
+            except Exception as e:
+                print('Exception: ' + str(e))
 
 client.run(os.getenv('TOKEN'))
