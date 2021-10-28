@@ -15,7 +15,8 @@ def get_delimiter(guild_id):
 
 
 def set_delimiter(args, guild_id):
-    if len(args) != 1: return
+    if len(args) != 1:
+        return
     configs = client['bigcharles']['configs']
     configs.update_one({'guild_id': guild_id}, {
                        '$set': {'delimiter': args[0]}}, upsert=True)
@@ -26,15 +27,18 @@ def get_patterns(guild_id):
 
 
 def set_pattern(args, guild_id):
-    if len(args) < 2: return
+    if len(args) < 2:
+        return
     regex = args[0]
-    response = ' '.join(args[1:])
+    response = args[1]
+    chance = int(args[2]) if len(args) > 2 else 100
 
     get_collection().update_one({'value': regex, 'guild_id': guild_id}, {
-        '$set': {'response': response}}, upsert=True)
+        '$set': {'response': response, 'chance': chance}}, upsert=True)
 
 
 def remove_pattern(args, guild_id):
-    if len(args) < 1: return
+    if len(args) < 1:
+        return
     regex = args[0]
     get_collection().delete_one({'value': regex, 'guild_id': guild_id})

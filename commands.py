@@ -7,14 +7,16 @@ def pattern(args, guild_id):
         'del': remove_pattern,
     }
 
-    if args[0] in params:
+    if len(args) and args[0] in params:
         params[args[0]](args[1:], guild_id)
 
 
 def list_patterns(args, guild_id):
     patterns = []
     for pattern in get_patterns(guild_id):
-        patterns.append(f'{pattern["value"]} = {pattern["response"]}')
+        patterns.append(
+            f'{pattern["value"]} = {"(" + str(pattern["chance"]) + "%) " if "chance" in pattern else ""}{pattern["response"]}')
+
     return '\n'.join(patterns)
 
 
