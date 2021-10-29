@@ -20,10 +20,12 @@ def list_patterns(args, guild_id):
         return s
 
     patterns = []
+    index = 1
     for pattern in get_patterns(guild_id):
         value = parse_value(pattern['value'])
         patterns.append(
-            f'{value} = {"(" + str(pattern["chance"]) + "%) " if "chance" in pattern else ""}{pattern["response"]}')
+            f'{index} - {value} = {"(" + str(pattern["chance"]) + "%) " if "chance" in pattern else ""}{pattern["response"]}')
+        index += 1
 
     return '\n'.join(patterns)
 
