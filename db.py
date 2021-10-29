@@ -4,6 +4,13 @@ from os import getenv
 client = MongoClient(getenv('MONGODB_URI'))
 
 
+def is_int(value):
+    try:
+        s = int(value)
+        return True
+    except Exception:
+        return False
+
 def get_collection():
     db = client['bigcharles']
     return db['patterns']
@@ -41,4 +48,10 @@ def remove_pattern(args, guild_id):
     if len(args) < 1:
         return
     regex = args[0]
-    get_collection().delete_one({'value': regex, 'guild_id': guild_id})
+    patterns = get_collection()
+    result = patterns.delete_one({'value': regex, 'guild_id': guild_id})
+    if result.deleted_count == 0 and is_int(regex):
+        # tries to delete pattern at position <regex>
+        pattern = patterns.find_one({'guild_id': guild_id}, skip=int(regex)-1)
+        if pattern:
+            patterns.delete_one({'_id': pattern['_id'] })
