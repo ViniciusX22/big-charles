@@ -1,4 +1,5 @@
 from db import set_pattern, remove_pattern, get_patterns, set_delimiter
+from os import getenv
 
 
 def pattern(args, guild_id):
