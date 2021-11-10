@@ -30,10 +30,15 @@ def list_patterns(args, guild_id):
     return '\n'.join(patterns)
 
 
+def get_help(args, guild_id):
+    return getenv('WIKI_URL')
+
+
 commands = {
     'delimiter': set_delimiter,
     'pattern': pattern,
-    'patterns': list_patterns
+    'patterns': list_patterns,
+    'help': get_help
 }
 
 
