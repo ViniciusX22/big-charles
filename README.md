@@ -1,2 +1,2 @@
-# big-charles
-Random Discord Bot to test some shenanigans
+# Big Charles
+Discord Bot that responds to word patterns and phrases
