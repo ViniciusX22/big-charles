@@ -1,19 +1,17 @@
 from pymongo import MongoClient
 from os import getenv
+from utils import is_int
 
 client = MongoClient(getenv('MONGODB_URI'))
 
 
-def is_int(value):
-    try:
-        s = int(value)
-        return True
-    except Exception:
-        return False
-
 def get_collection():
     db = client['bigcharles']
     return db['patterns']
+
+
+def get_total(guild_id):
+    return get_collection().count_documents({'guild_id': guild_id})
 
 
 def get_delimiter(guild_id):
@@ -29,8 +27,8 @@ def set_delimiter(args, guild_id):
                        '$set': {'delimiter': args[0]}}, upsert=True)
 
 
-def get_patterns(guild_id):
-    return get_collection().find({'guild_id': guild_id})
+def get_patterns(guild_id, **kwargs):
+    return get_collection().find({'guild_id': guild_id}, **kwargs)
 
 
 def set_pattern(args, guild_id):
@@ -54,4 +52,4 @@ def remove_pattern(args, guild_id):
         # tries to delete pattern at position <regex>
         pattern = patterns.find_one({'guild_id': guild_id}, skip=int(regex)-1)
         if pattern:
-            patterns.delete_one({'_id': pattern['_id'] })
+            patterns.delete_one({'_id': pattern['_id']})
