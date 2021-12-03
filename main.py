@@ -35,8 +35,8 @@ async def on_message(message):
         delimiter = '!'
 
     splited_message = message.content.split(' ')
-    if message.content.startswith(delimiter) and splited_message[0][1:] in commands:
-        await run_command(splited_message[0][1:], splited_message[1:], message)
+    if message.content.startswith(delimiter) and splited_message[0][len(delimiter):] in commands:
+        await run_command(splited_message[0][len(delimiter):], splited_message[1:], message)
     else:
         patterns = get_patterns(message.guild.id)
         for pattern in patterns:
