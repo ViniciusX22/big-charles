@@ -2,6 +2,7 @@ from db import set_pattern, remove_pattern, get_patterns, set_delimiter, get_tot
 from os import getenv
 from utils import is_int
 from math import ceil
+from pyfiglet import Figlet, FontNotFound
 
 PAGE_SIZE = int(getenv('PAGE_SIZE', 30))
 
@@ -59,11 +60,31 @@ def get_help(args, guild_id):
     return getenv('WIKI_URL')
 
 
+def use_figlet(args, guild_id):
+    if len(args) < 1: return
+
+    font = None
+    if args[0].startswith('f=') or args[0].startswith('font='):
+        font = args[0][args[0].index('=') + 1:]
+        
+    index = 0 if not font else 1
+    if not font: font = 'standard'
+
+    text = ' '.join(args[index:])
+    wrapper = '```'
+    try:
+        f = Figlet(font=font)
+        return f'{wrapper}{f.renderText(text)}{wrapper}'
+    except FontNotFound:
+        return 'Fonte inválida bro'
+
+
 commands = {
     'delimiter': set_delimiter,
     'pattern': pattern,
     'patterns': list_patterns,
-    'help': get_help
+    'help': get_help,
+    'figlet': use_figlet
 }
 
 
