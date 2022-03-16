@@ -28,6 +28,14 @@ async def on_message(message):
             value = value[1:-2] + '>'
         return re.escape(value)
 
+    def match_pattern(value, text):
+        if value.startswith('user:'):
+            author_id = int(value.split(':')[1])
+            return author_id == message.author.id
+        else:
+            r = re.compile(value, flags=re.I)
+            return r.search(message.content)
+
     delimiter = None
     try:
         delimiter = get_delimiter(message.guild.id)
@@ -42,9 +50,8 @@ async def on_message(message):
         for pattern in patterns:
             try:
                 value = parse_value(pattern['value'])
-                r = re.compile(value, flags=re.I)
                 pattern_chance = pattern['chance'] if 'chance' in pattern else 100
-                if r.search(message.content) and randrange(0, 100) <= pattern_chance:
+                if match_pattern(value, message.content) and randrange(0, 100) <= pattern_chance:
                     await message.channel.send(pattern['response'])
                     break
             except Exception as e:
