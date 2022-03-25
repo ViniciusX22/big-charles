@@ -1,6 +1,8 @@
 from pymongo import MongoClient
 from os import getenv
 from utils import is_int
+from dotenv import load_dotenv
+load_dotenv()
 
 client = MongoClient(getenv('MONGODB_URI'))
 
