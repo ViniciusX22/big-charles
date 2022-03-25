@@ -1,11 +1,11 @@
+from db import get_patterns, get_delimiter
+from commands import run_command, commands
 import discord
 import re
 import os
 from random import randrange
 from dotenv import load_dotenv
 load_dotenv()
-from commands import run_command, commands
-from db import get_patterns, get_delimiter
 
 
 client = discord.Client()
@@ -28,7 +28,7 @@ async def on_message(message):
             value = value[1:-2] + '>'
         return re.escape(value)
 
-    def match_pattern(value, text):
+    def match_pattern(value):
         if value.startswith('user:'):
             author_id = int(value.split(':')[1])
             return author_id == message.author.id
@@ -51,7 +51,7 @@ async def on_message(message):
             try:
                 value = parse_value(pattern['value'])
                 pattern_chance = pattern['chance'] if 'chance' in pattern else 100
-                if match_pattern(value, message.content) and randrange(0, 100) <= pattern_chance:
+                if match_pattern(value) and randrange(0, 100) <= pattern_chance:
                     await message.channel.send(pattern['response'])
                     break
             except Exception as e:
