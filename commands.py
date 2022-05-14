@@ -3,11 +3,12 @@ from os import getenv
 from utils import is_int
 from math import ceil
 from pyfiglet import Figlet, FontNotFound
+from economy import commands as economy_commands
 
 PAGE_SIZE = int(getenv('PAGE_SIZE', 30))
 
 
-def pattern(args, guild_id):
+def pattern(args, guild_id, author_id):
     params = {
         'set': set_pattern,
         'del': remove_pattern,
@@ -17,7 +18,7 @@ def pattern(args, guild_id):
         params[args[0]](args[1:], guild_id)
 
 
-def list_patterns(args, guild_id):
+def list_patterns(args, guild_id, author_id):
     def parse_value(s):
         if s.startswith('<') and s.endswith('>'):
             return f'`{s[1:-1]}`'
@@ -49,26 +50,29 @@ def list_patterns(args, guild_id):
                 msg = get_patterns_at_page(page)
 
         elif is_int(args[0]) and int(args[0]) > 0:
-            msgs.append(page_index(int(args[0])) + '\n' + get_patterns_at_page(int(args[0]) - 1))
+            msgs.append(page_index(
+                int(args[0])) + '\n' + get_patterns_at_page(int(args[0]) - 1))
 
         return msgs
     else:
         return page_index() + '\n' + get_patterns_at_page()
 
 
-def get_help(args, guild_id):
+def get_help(args, guild_id, author_id):
     return getenv('WIKI_URL')
 
 
-def use_figlet(args, guild_id):
-    if len(args) < 1: return
+def use_figlet(args, guild_id, author_id):
+    if len(args) < 1:
+        return
 
     font = None
     if args[0].startswith('f=') or args[0].startswith('font='):
         font = args[0][args[0].index('=') + 1:]
-        
+
     index = 0 if not font else 1
-    if not font: font = 'standard'
+    if not font:
+        font = 'standard'
 
     text = ' '.join(args[index:])
     wrapper = '```'
@@ -84,7 +88,8 @@ commands = {
     'pattern': pattern,
     'patterns': list_patterns,
     'help': get_help,
-    'figlet': use_figlet
+    'figlet': use_figlet,
+    **economy_commands
 }
 
 
@@ -118,10 +123,11 @@ def parse_args(args):
 
 async def run_command(command, args, message):
     args = parse_args(args)
-    text = commands[command](args, message.guild.id)
-    if text:
+    text = commands[command](args, message.guild.id, message.author.id)
+    if text is not None:
         if type(text) == list:
             for line in text:
-                if line: await message.channel.send(line)
+                if line:
+                    await message.channel.send(line)
         else:
             await message.channel.send(text)

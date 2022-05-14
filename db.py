@@ -7,6 +7,10 @@ load_dotenv()
 client = MongoClient(getenv('MONGODB_URI'))
 
 
+def get_db():
+    return client['bigcharles']
+
+
 def get_collection():
     db = client['bigcharles']
     return db['patterns']
@@ -21,7 +25,7 @@ def get_delimiter(guild_id):
     return config['delimiter']
 
 
-def set_delimiter(args, guild_id):
+def set_delimiter(args, guild_id, author_id):
     if len(args) != 1:
         return
     configs = client['bigcharles']['configs']
