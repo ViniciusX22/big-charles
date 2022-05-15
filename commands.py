@@ -3,21 +3,22 @@ from os import getenv
 from utils import is_int
 from math import ceil
 from pyfiglet import Figlet, FontNotFound
+from economy import commands as economy_commands
 
 PAGE_SIZE = int(getenv('PAGE_SIZE', 30))
 
 
-def pattern(args, guild_id):
+def pattern(args, guild, author):
     params = {
         'set': set_pattern,
         'del': remove_pattern,
     }
 
     if len(args) and args[0] in params:
-        params[args[0]](args[1:], guild_id)
+        params[args[0]](args[1:], guild.id)
 
 
-def list_patterns(args, guild_id):
+def list_patterns(args, guild, author):
     def parse_value(s):
         if s.startswith('<') and s.endswith('>'):
             return f'`{s[1:-1]}`'
@@ -26,7 +27,7 @@ def list_patterns(args, guild_id):
         return s
 
     def page_index(page=1):
-        return f'**Página [{page}/{ceil(get_total(guild_id) / PAGE_SIZE)}]**'
+        return f'**Página [{page}/{ceil(get_total(guild.id) / PAGE_SIZE)}]**'
 
     def get_patterns_at_page(page=0, limit=PAGE_SIZE):
         patterns = []
@@ -49,26 +50,29 @@ def list_patterns(args, guild_id):
                 msg = get_patterns_at_page(page)
 
         elif is_int(args[0]) and int(args[0]) > 0:
-            msgs.append(page_index(int(args[0])) + '\n' + get_patterns_at_page(int(args[0]) - 1))
+            msgs.append(page_index(
+                int(args[0])) + '\n' + get_patterns_at_page(int(args[0]) - 1))
 
         return msgs
     else:
         return page_index() + '\n' + get_patterns_at_page()
 
 
-def get_help(args, guild_id):
+def get_help(args, guild, author):
     return getenv('WIKI_URL')
 
 
-def use_figlet(args, guild_id):
-    if len(args) < 1: return
+def use_figlet(args, guild, author):
+    if len(args) < 1:
+        return
 
     font = None
     if args[0].startswith('f=') or args[0].startswith('font='):
         font = args[0][args[0].index('=') + 1:]
-        
+
     index = 0 if not font else 1
-    if not font: font = 'standard'
+    if not font:
+        font = 'standard'
 
     text = ' '.join(args[index:])
     wrapper = '```'
@@ -84,7 +88,8 @@ commands = {
     'pattern': pattern,
     'patterns': list_patterns,
     'help': get_help,
-    'figlet': use_figlet
+    'figlet': use_figlet,
+    **economy_commands
 }
 
 
@@ -118,10 +123,13 @@ def parse_args(args):
 
 async def run_command(command, args, message):
     args = parse_args(args)
-    text = commands[command](args, message.guild.id)
-    if text:
-        if type(text) == list:
-            for line in text:
-                if line: await message.channel.send(line)
+    response = commands[command](args, message.guild, message.author)
+    if response is not None:
+        if type(response) == list:
+            for line in response:
+                if line:
+                    await message.channel.send(line)
+        elif type(response) == dict:
+            await message.channel.send(**response)
         else:
-            await message.channel.send(text)
+            await message.channel.send(response)
