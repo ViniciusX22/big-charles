@@ -8,17 +8,17 @@ from economy import commands as economy_commands
 PAGE_SIZE = int(getenv('PAGE_SIZE', 30))
 
 
-def pattern(args, guild_id, author_id):
+def pattern(args, guild, author):
     params = {
         'set': set_pattern,
         'del': remove_pattern,
     }
 
     if len(args) and args[0] in params:
-        params[args[0]](args[1:], guild_id)
+        params[args[0]](args[1:], guild.id)
 
 
-def list_patterns(args, guild_id, author_id):
+def list_patterns(args, guild, author):
     def parse_value(s):
         if s.startswith('<') and s.endswith('>'):
             return f'`{s[1:-1]}`'
@@ -27,7 +27,7 @@ def list_patterns(args, guild_id, author_id):
         return s
 
     def page_index(page=1):
-        return f'**Página [{page}/{ceil(get_total(guild_id) / PAGE_SIZE)}]**'
+        return f'**Página [{page}/{ceil(get_total(guild.id) / PAGE_SIZE)}]**'
 
     def get_patterns_at_page(page=0, limit=PAGE_SIZE):
         patterns = []
@@ -58,11 +58,11 @@ def list_patterns(args, guild_id, author_id):
         return page_index() + '\n' + get_patterns_at_page()
 
 
-def get_help(args, guild_id, author_id):
+def get_help(args, guild, author):
     return getenv('WIKI_URL')
 
 
-def use_figlet(args, guild_id, author_id):
+def use_figlet(args, guild, author):
     if len(args) < 1:
         return
 
@@ -123,11 +123,13 @@ def parse_args(args):
 
 async def run_command(command, args, message):
     args = parse_args(args)
-    text = commands[command](args, message.guild.id, message.author.id)
-    if text is not None:
-        if type(text) == list:
-            for line in text:
+    response = commands[command](args, message.guild, message.author)
+    if response is not None:
+        if type(response) == list:
+            for line in response:
                 if line:
                     await message.channel.send(line)
+        elif type(response) == dict:
+            await message.channel.send(**response)
         else:
-            await message.channel.send(text)
+            await message.channel.send(response)
