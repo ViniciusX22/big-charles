@@ -32,7 +32,7 @@ def list_patterns(args, guild, author):
     def get_patterns_at_page(page=0, limit=PAGE_SIZE):
         patterns = []
         index = 1 + PAGE_SIZE * page
-        for pattern in get_patterns(guild_id, skip=page * PAGE_SIZE, limit=limit):
+        for pattern in get_patterns(guild.id, skip=page * PAGE_SIZE, limit=limit):
             value = parse_value(pattern['value'])
             patterns.append(
                 f'{index} - {value} = {"(" + str(pattern["chance"]) + "%) " if "chance" in pattern else ""}{pattern["response"]}')
