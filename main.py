@@ -32,6 +32,12 @@ async def on_message(message):
         if value.startswith('user:'):
             author_id = int(value.split(':')[1])
             return author_id == message.author.id
+        elif value.startswith('role:'):
+            role_id = int(value.split(':')[1])
+            for role in message.author.roles:
+                if role_id == role.id:
+                    return True
+            return False
         else:
             r = re.compile(value, flags=re.I)
             return r.search(message.content)

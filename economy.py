@@ -94,9 +94,13 @@ def pix(args, guild, author):
     if not receiver:
         return error_embed('Destinatário inválido')
 
-    amount = float(args[1].replace(',', '.'))
-    if amount <= 0:
-        return error_embed('Valor deve ser maior que 0')
+    amount = None
+    try:
+        amount = float(args[1].replace(',', '.'))
+        if amount <= 0:
+            return error_embed('Valor deve ser maior que 0')
+    except ValueError:
+        return error_embed('Sintaxe inválida')
 
     sender_bank = get_user_bank(author.id)
 
