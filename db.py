@@ -42,7 +42,7 @@ def set_pattern(args, guild_id):
         return
     regex = args[0]
     response = args[1]
-    chance = int(args[2]) if len(args) > 2 else 100
+    chance = float(args[2]) if len(args) > 2 else 100
 
     get_collection().update_one({'value': regex, 'guild_id': guild_id}, {
         '$set': {'response': response, 'chance': chance}}, upsert=True)
