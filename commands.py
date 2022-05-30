@@ -6,6 +6,7 @@ from pyfiglet import Figlet, FontNotFound
 from economy import commands as economy_commands
 
 PAGE_SIZE = int(getenv('PAGE_SIZE', 30))
+ADM_ROLE_ID = int(getenv('ADM_ROLE_ID'))
 
 
 def pattern(args, guild, author):
@@ -92,6 +93,8 @@ commands = {
     **economy_commands
 }
 
+adm_only_commands = ['delimiter', 'pattern']
+
 
 def parse_args(args):
     if len(args) < 2:
@@ -122,6 +125,13 @@ def parse_args(args):
 
 
 async def run_command(command, args, message):
+    if (command in adm_only_commands and message.author.id != message.guild.owner_id):
+        allowed = False
+        for role in message.author.roles:
+            if ADM_ROLE_ID == role.id:
+                allowed = True
+        if not allowed:
+            return
     args = parse_args(args)
     response = commands[command](args, message.guild, message.author)
     if response is not None:
